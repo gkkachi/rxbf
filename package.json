@@ -1,0 +1,9 @@
+{
+  "name": "rxbf",
+  "version": "0.1.0",
+  "description": "Reactive bitFlyer Lightning Library",
+  "main": "src/index.ts",
+  "repository": "https://github.com/gkkachi/rxbf.git",
+  "author": "Konosuke Kachi <github@s.k-kachi.net>",
+  "license": "MIT"
+}
