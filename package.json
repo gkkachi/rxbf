@@ -23,6 +23,7 @@
     "husky": "^5.0.0-alpha.6",
     "is-ci": "^2.0.0",
     "jest": "^26.4.2",
+    "lint-staged": "^10.4.0",
     "pinst": "^2.0.0",
     "ts-jest": "^26.4.1",
     "ts-node": "^9.0.0",
@@ -32,5 +33,8 @@
     "node-fetch": "^2.6.1",
     "rxjs": "^6.6.3",
     "ws": "^7.3.1"
+  },
+  "lint-staged": {
+    "*.ts": ["eslint --fix"]
   }
 }
