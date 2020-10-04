@@ -17,6 +17,10 @@ jobs:
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
+    
+    env:
+      BITFLYER_API_KEY: ${{ secrets.BITFLYER_API_KEY }}
+      BITFLYER_API_SECRET: ${{ secrets.BITFLYER_API_SECRET }}
 
     steps:
     - uses: actions/checkout@v2
