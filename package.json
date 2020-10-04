@@ -5,5 +5,14 @@
   "main": "src/index.ts",
   "repository": "https://github.com/gkkachi/rxbf.git",
   "author": "Konosuke Kachi <github@s.k-kachi.net>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
+  }
 }
