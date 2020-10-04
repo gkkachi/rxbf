@@ -1,36 +1,13 @@
 import { pipe } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
-import RXBF from './rxbf';
+import HttpClient from './http';
 
-describe('RXBF', () => {
-  const rxbf = new RXBF();
+describe('HttpClient', () => {
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';
   const f = pipe(first(), timeout(10 * 1000));
 
-  afterAll(() => { rxbf.unsubscribe(); });
-
-  it('should subscribe board', async () => {
-    const res = await rxbf.board(code).pipe(f).toPromise();
-    expect(res).toBeTruthy();
-  });
-
-  it('should subscribe boardSnapshot', async () => {
-    const res = await rxbf.boardSnapshot(code).pipe(f).toPromise();
-    expect(res).toBeTruthy();
-  });
-
-  it('should subscribe executions', async () => {
-    const res = await rxbf.executions(code).pipe(f).toPromise();
-    expect(res).toBeTruthy();
-  });
-
-  it('should subscribe ticker', async () => {
-    const res = await rxbf.ticker(code).pipe(f).toPromise();
-    expect(res).toBeTruthy();
-  });
-
   it('should get markets', async () => {
-    const res: any = await RXBF.markets().pipe(f).toPromise();
+    const res: any = await HttpClient.markets().pipe(f).toPromise();
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       // eslint-disable-next-line no-param-reassign
@@ -43,7 +20,7 @@ describe('RXBF', () => {
   });
 
   it('should get board', async () => {
-    const res: any = await RXBF.board1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.board1(code).pipe(f).toPromise();
     expect(res).toEqual({
       mid_price: expect.any(Number),
       bids: expect.any(Array),
@@ -52,7 +29,7 @@ describe('RXBF', () => {
   });
 
   it('should get ticker', async () => {
-    const res: any = await RXBF.ticker1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.ticker1(code).pipe(f).toPromise();
     expect(res).toEqual({
       product_code: code,
       state: expect.any(String),
@@ -73,7 +50,7 @@ describe('RXBF', () => {
   });
 
   it('should get executions', async () => {
-    const res: any = await RXBF.executions1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.executions1(code).pipe(f).toPromise();
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       expect(x).toEqual({
@@ -89,7 +66,7 @@ describe('RXBF', () => {
   });
 
   it('should get board state', async () => {
-    const res: any = await RXBF.boardState(code).pipe(f).toPromise();
+    const res: any = await HttpClient.boardState(code).pipe(f).toPromise();
     // eslint-disable-next-line no-param-reassign
     delete res.data;
     expect(res).toEqual({
@@ -99,7 +76,7 @@ describe('RXBF', () => {
   });
 
   it('should get health', async () => {
-    const res: any = await RXBF.health(code).pipe(f).toPromise();
+    const res: any = await HttpClient.health(code).pipe(f).toPromise();
     expect(res).toEqual({
       status: expect.any(String),
     });
@@ -108,7 +85,7 @@ describe('RXBF', () => {
   it('should get chats', async () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const res: any = await RXBF.chats(yesterday).pipe(f).toPromise();
+    const res: any = await HttpClient.chats(yesterday).pipe(f).toPromise();
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       expect(x).toEqual({
