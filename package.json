@@ -7,7 +7,7 @@
   "author": "Konosuke Kachi <github@s.k-kachi.net>",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint --ext .ts ./src",
     "_postinstall": "is-ci || husky install",
     "prepublish": "pinst --disable",
     "postpublish": "pinst --enable"
