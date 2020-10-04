@@ -19,6 +19,10 @@ export default class RXBF {
       this.subject.subscribe();
     }
 
+    public unsubscribe() {
+      this.subject.unsubscribe();
+    }
+
     public board(product: ProductCode) {
       return this.subscribe(`lightning_board_${product}`);
     }
