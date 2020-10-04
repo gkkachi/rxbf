@@ -1,8 +1,11 @@
-import { Subject } from 'rxjs';
+import { URL } from 'url';
+import { Subject, of, throwError } from 'rxjs';
+import { fromFetch } from 'rxjs/fetch';
 import { webSocket } from 'rxjs/webSocket';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, mergeMap } from 'rxjs/operators';
 
 const WebSocket = require('ws');
+global.fetch = require('node-fetch');
 
 type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
 
@@ -39,6 +42,34 @@ export default class RXBF {
       return this.subscribe(`lightning_ticker_${product}`);
     }
 
+    public static markets() {
+      return RXBF.get('markets', {});
+    }
+
+    public static board1(product?: ProductCode) {
+      return RXBF.get('board', { product_code: product });
+    }
+
+    public static ticker1(product?: ProductCode) {
+      return RXBF.get('ticker', { product_code: product });
+    }
+
+    public static executions1(product?: ProductCode) {
+      return RXBF.get('executions', { product_code: product });
+    }
+
+    public static boardState(product?: ProductCode) {
+      return RXBF.get('getboardstate', { product_code: product });
+    }
+
+    public static health(product?: ProductCode) {
+      return RXBF.get('gethealth', { product_code: product });
+    }
+
+    public static chats(from?: Date) {
+      return RXBF.get('getchats', { from_date: from?.toISOString() });
+    }
+
     private subscribe(channel: string) {
       if (this.subscribed.indexOf(channel) < 0) {
         this.call('subscribe', { channel });
@@ -59,5 +90,14 @@ export default class RXBF {
         params,
         id: Date.now().toString(),
       });
+    }
+
+    private static get(method: string, params: object) {
+      const url = new URL(`https://api.bitflyer.com/v1/${method}`);
+      // eslint-disable-next-line no-return-assign
+      Object.entries(params).forEach(([k, v]) => url.search = `${k}=${v}`);
+      return fromFetch(url.toString()).pipe(
+        mergeMap((x) => (x.ok ? of(x.json()) : throwError(new Error(x.status.toString())))),
+      );
     }
 }
