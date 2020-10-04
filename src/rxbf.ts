@@ -23,7 +23,7 @@ export default class RXBF {
       return this.subscribe(`lightning_board_${product}`);
     }
 
-    public board_snapshot(product: ProductCode) {
+    public boardSnapshot(product: ProductCode) {
       return this.subscribe(`lightning_board_snapshot_${product}`);
     }
 
