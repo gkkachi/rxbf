@@ -1,3 +1,4 @@
+import './rxbf';
 import { pipe } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
 import HttpClient from './http';
