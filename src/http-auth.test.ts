@@ -3,6 +3,9 @@ import { pipe } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
 import HttpClientAuth from './http-auth';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('dotenv').config();
+
 describe('HttpClientAuth', () => {
   const client = new HttpClientAuth(env.BITFLYER_API_KEY, env.BITFLYER_API_SECRET);
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';

@@ -6,6 +6,7 @@ import { fromFetch } from 'rxjs/fetch';
 import { map, mergeMap } from 'rxjs/operators';
 
 global.fetch = fetch;
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv').config();
 
