@@ -1,11 +1,9 @@
-import fetch, { Headers, Request } from 'node-fetch';
+import { Headers, Request } from 'node-fetch';
 import { URL } from 'url';
 import { createHmac } from 'crypto';
 import { from } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { map, mergeMap } from 'rxjs/operators';
-
-global.fetch = fetch;
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv').config();

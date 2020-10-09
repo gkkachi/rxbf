@@ -6,6 +6,7 @@ import { mergeMap } from 'rxjs/operators';
 type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
 
 global.fetch = require('node-fetch');
+global.AbortController = require('node-abort-controller');
 
 export default class HttpClient {
   public static markets() {

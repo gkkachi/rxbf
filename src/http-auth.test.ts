@@ -1,3 +1,4 @@
+import './rxbf';
 import { env } from 'process';
 import { pipe } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
