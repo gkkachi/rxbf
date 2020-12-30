@@ -1,14 +1,11 @@
 import './rxbf';
-import { pipe } from 'rxjs';
-import { first, timeout } from 'rxjs/operators';
 import HttpClient from './http';
 
 describe('HttpClient', () => {
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';
-  const f = pipe(first(), timeout(10 * 1000));
 
   it('should get markets', async () => {
-    const res: any = await HttpClient.markets().pipe(f).toPromise();
+    const res: any = await HttpClient.markets();
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       // eslint-disable-next-line no-param-reassign
@@ -21,7 +18,7 @@ describe('HttpClient', () => {
   });
 
   it('should get board', async () => {
-    const res: any = await HttpClient.board1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.board1(code);
     expect(res).toEqual({
       mid_price: expect.any(Number),
       bids: expect.any(Array),
@@ -30,7 +27,7 @@ describe('HttpClient', () => {
   });
 
   it('should get ticker', async () => {
-    const res: any = await HttpClient.ticker1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.ticker1(code);
     expect(res).toEqual({
       product_code: code,
       state: expect.any(String),
@@ -51,7 +48,7 @@ describe('HttpClient', () => {
   });
 
   it('should get executions', async () => {
-    const res: any = await HttpClient.executions1(code).pipe(f).toPromise();
+    const res: any = await HttpClient.executions1(code);
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       expect(x).toEqual({
@@ -67,7 +64,7 @@ describe('HttpClient', () => {
   });
 
   it('should get board state', async () => {
-    const res: any = await HttpClient.boardState(code).pipe(f).toPromise();
+    const res: any = await HttpClient.boardState(code);
     // eslint-disable-next-line no-param-reassign
     delete res.data;
     expect(res).toEqual({
@@ -77,7 +74,7 @@ describe('HttpClient', () => {
   });
 
   it('should get health', async () => {
-    const res: any = await HttpClient.health(code).pipe(f).toPromise();
+    const res: any = await HttpClient.health(code);
     expect(res).toEqual({
       status: expect.any(String),
     });
@@ -86,7 +83,7 @@ describe('HttpClient', () => {
   it('should get chats', async () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const res: any = await HttpClient.chats(yesterday).pipe(f).toPromise();
+    const res: any = await HttpClient.chats(yesterday);
     expect(res).toBeInstanceOf(Array);
     res.forEach((x) => {
       expect(x).toEqual({

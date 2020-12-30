@@ -1,14 +1,17 @@
 import { createHmac, randomBytes } from 'crypto';
-import { shareReplay } from 'rxjs/operators';
+import { Observable, from, concat } from 'rxjs';
+import { ignoreElements, shareReplay } from 'rxjs/operators';
 import RealtimeClient from './realtime';
 
 export default class RealtimeAuthClient extends RealtimeClient {
+  private auth$: Observable<unknown>;
+
   constructor(key: string, secret: string) {
     if (!key || !secret) {
       throw new Error('API key and/or secret are required.');
     }
     super();
-    this.auth$ = this.auth(key, secret).pipe(shareReplay());
+    this.auth$ = from(this.auth(key, secret)).pipe(shareReplay(), ignoreElements());
   }
 
   public childOrderEvents() {
@@ -20,7 +23,7 @@ export default class RealtimeAuthClient extends RealtimeClient {
   }
 
   protected subscribe(channel: string) {
-    return super.subscribe(channel);
+    return concat(this.auth$, super.subscribe(channel));
   }
 
   protected auth(key: string, secret: string) {

@@ -1,11 +1,16 @@
+import { env } from 'process';
 import { pipe } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
-import RealtimeClient from './realtime';
+// import RealtimeClient from './realtime';
+import RealtimeClient from './realtime-auth';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('dotenv').config();
 
 describe('RealtimeClient', () => {
-  const rxbf = new RealtimeClient();
+  const rxbf = new RealtimeClient(env.BITFLYER_API_KEY, env.BITFLYER_API_SECRET);
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';
-  const f = pipe(first(), timeout(10 * 1000));
+  const f = pipe(first(), timeout(60 * 1000));
 
   afterAll(() => { rxbf.unsubscribe(); });
 
