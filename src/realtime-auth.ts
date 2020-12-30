@@ -6,7 +6,7 @@ import RealtimeClient from './realtime';
 export default class RealtimeAuthClient extends RealtimeClient {
   private auth$: Observable<unknown>;
 
-  constructor(key: string, secret: string) {
+  constructor(key?: string, secret?: string) {
     if (!key || !secret) {
       throw new Error('API key and/or secret are required.');
     }

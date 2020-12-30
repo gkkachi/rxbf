@@ -5,9 +5,9 @@ describe('HttpClient', () => {
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';
 
   it('should get markets', async () => {
-    const res: any = await HttpClient.markets();
+    const res = await HttpClient.markets();
     expect(res).toBeInstanceOf(Array);
-    res.forEach((x) => {
+    res?.forEach((x: any) => {
       // eslint-disable-next-line no-param-reassign
       delete x.alias;
       expect(x).toEqual({
@@ -18,7 +18,7 @@ describe('HttpClient', () => {
   });
 
   it('should get board', async () => {
-    const res: any = await HttpClient.board1(code);
+    const res = await HttpClient.board1(code);
     expect(res).toEqual({
       mid_price: expect.any(Number),
       bids: expect.any(Array),
@@ -27,7 +27,7 @@ describe('HttpClient', () => {
   });
 
   it('should get ticker', async () => {
-    const res: any = await HttpClient.ticker1(code);
+    const res = await HttpClient.ticker1(code);
     expect(res).toEqual({
       product_code: code,
       state: expect.any(String),
@@ -48,9 +48,9 @@ describe('HttpClient', () => {
   });
 
   it('should get executions', async () => {
-    const res: any = await HttpClient.executions1(code);
+    const res = await HttpClient.executions1(code);
     expect(res).toBeInstanceOf(Array);
-    res.forEach((x) => {
+    res?.forEach((x) => {
       expect(x).toEqual({
         id: expect.any(Number),
         side: expect.any(String),
@@ -74,7 +74,7 @@ describe('HttpClient', () => {
   });
 
   it('should get health', async () => {
-    const res: any = await HttpClient.health(code);
+    const res = await HttpClient.health(code);
     expect(res).toEqual({
       status: expect.any(String),
     });
@@ -83,9 +83,9 @@ describe('HttpClient', () => {
   it('should get chats', async () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const res: any = await HttpClient.chats(yesterday);
+    const res = await HttpClient.chats(yesterday);
     expect(res).toBeInstanceOf(Array);
-    res.forEach((x) => {
+    res?.forEach((x) => {
       expect(x).toEqual({
         nickname: expect.any(String),
         message: expect.any(String),

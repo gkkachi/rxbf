@@ -2,7 +2,10 @@
   "name": "rxbf",
   "version": "0.1.0",
   "description": "Reactive bitFlyer Lightning Library",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "files": [
+    "/dist"
+  ],
   "repository": "https://github.com/gkkachi/rxbf.git",
   "author": "Konosuke Kachi <github@s.k-kachi.net>",
   "license": "MIT",
@@ -11,7 +14,8 @@
     "test": "jest",
     "_postinstall": "is-ci || husky install",
     "prepublish": "pinst --disable",
-    "postpublish": "pinst --enable"
+    "postpublish": "pinst --enable",
+    "prepare": "tsc"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.5.7",

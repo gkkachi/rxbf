@@ -11,7 +11,10 @@ export default class HttpClientAuth {
 
   private secret: string;
 
-  constructor(key: string, secret: string) {
+  constructor(key?: string, secret?: string) {
+    if (!key || !secret) {
+      throw new Error('API key and/or secret are required.');
+    }
     this.key = key;
     this.secret = secret;
   }
