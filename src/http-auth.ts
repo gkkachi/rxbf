@@ -1,14 +1,10 @@
-import { Headers, Request } from 'node-fetch';
+import fetch, { Headers, Request } from 'node-fetch';
 import { URL } from 'url';
 import { createHmac } from 'crypto';
-import { from } from 'rxjs';
-import { fromFetch } from 'rxjs/fetch';
-import { map, mergeMap } from 'rxjs/operators';
+import type * as Types from './types';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv').config();
-
-type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
 
 export default class HttpClientAuth {
   private key: string;
@@ -21,81 +17,72 @@ export default class HttpClientAuth {
   }
 
   public permissions() {
-    return this.get('getpermissions', {});
+    return this.get<string[]>('getpermissions', {});
   }
 
   public balance() {
-    return this.get('getbalance', {});
+    return this.get<Types.BalanceItem[]>('getbalance', {});
   }
 
   public collateral() {
-    return this.get('getcollateral', {});
+    return this.get<Types.Collateral>('getcollateral', {});
   }
 
   public coinIns() {
-    return this.get('getcoinins', {});
+    return this.get<Types.CoinIn[]>('getcoinins', {});
   }
 
   public coinOuts() {
-    return this.get('getcoinouts', {});
+    return this.get<Types.CoinOut[]>('getcoinouts', {});
   }
 
   public bankAccounts() {
-    return this.get('getbankaccounts', {});
+    return this.get<Types.BankAccount[]>('getbankaccounts', {});
   }
 
   public deposits() {
-    return this.get('getdeposits', {});
+    return this.get<Types.Deposit[]>('getdeposits', {});
   }
 
-  public withdraw(currencyCode: 'JPY', bankId: number, amount: number, code? : string) {
-    return this.post('withdraw', {
-      currency_code: currencyCode,
-      bank_accound_id: bankId,
-      amount,
-      code,
-    });
+  public withdraw(body: Types.Withdraw) {
+    return this.post('withdraw', body);
   }
 
   public widthdrawals() {
-    return this.get('getwidthdrawals', {});
+    return this.get<Types.Withdrawal[]>('getwidthdrawals', {});
   }
 
-  public sendChildOrder(product: ProductCode, orderType: 'LIMIT' | 'MARKET', side: 'BUY' | 'SELL', price: number, size: number) {
-    return this.post('sendchildorder', {
-      product_code: product,
-      child_order_type: orderType,
-      side,
-      price,
-      size,
-    });
+  public sendChildOrder(
+    body: Types.ChildOrderBody,
+  ) {
+    return this.post('sendchildorder', body);
   }
 
-  public cancelAllChildOrders(product: ProductCode) {
+  public cancelAllChildOrders(product: Types.ProductCode) {
     return this.post('cancelallchildorders', { product_code: product });
   }
 
   public positions(product: 'FX_BTC_JPY') {
-    return this.get('getcollateralhistory', { product_code: product });
+    return this.get<Types.Position[]>('getpositions', { product_code: product });
   }
 
   public collateralHistory() {
-    return this.get('getcollateralhistory', {});
+    return this.get<Types.CollateralHistoryItem[]>('getcollateralhistory', {});
   }
 
-  public tradingCommission(product: ProductCode) {
-    return this.get('gettradingcommission', { product_code: product });
+  public tradingCommission(product: Types.ProductCode) {
+    return this.get<Types.TradingCommission>('gettradingcommission', { product_code: product });
   }
 
-  private get(method: string, params: object) {
-    return this.request('GET', `/v1/me/${method}`, params);
+  private get<T>(method: string, params: object) {
+    return this.request<T>('GET', `/v1/me/${method}`, params);
   }
 
-  private post(method: string, params: object) {
-    return this.request('POST', `/v1/me/${method}`, {}, params);
+  private post<T>(method: string, params: object) {
+    return this.request<T>('POST', `/v1/me/${method}`, {}, params);
   }
 
-  private request(method: 'GET' | 'POST', path: string, query: object, bodyObj?: object) {
+  private async request<T>(method: 'GET' | 'POST', path: string, query: object, bodyObj?: object) {
     const url = new URL(`https://api.bitflyer.com${path}`);
     // eslint-disable-next-line no-return-assign
     if (query)Object.entries(query).forEach(([k, v]) => url.search = `${k}=${v}`);
@@ -111,9 +98,14 @@ export default class HttpClientAuth {
     const request = method === 'GET'
       ? new Request(url.toString(), { headers, method })
       : new Request(url.toString(), { headers, method, body });
-    return fromFetch(request).pipe(
-      mergeMap((x) => from(x.text())),
-      map((x) => (x ? JSON.parse(x) : null)),
-    );
+    const res = await fetch(request);
+    if (!res.ok) {
+      throw new Error(res.statusText);
+    }
+    try {
+      return await res.json() as T;
+    } catch {
+      return null;
+    }
   }
 }

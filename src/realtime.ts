@@ -1,12 +1,10 @@
 import {
-  Observable, Subject, concat, of, throwError,
+  Observable, Subject, concat, from,
 } from 'rxjs';
 import { webSocket } from 'rxjs/webSocket';
 import {
-  filter, first, ignoreElements, map, mergeMap, share, tap,
+  filter, first, ignoreElements, map, share,
 } from 'rxjs/operators';
-
-const WebSocket = require('ws');
 
 type JsonRpcId = string;
 
@@ -34,12 +32,11 @@ export default class RealtimeClient {
 
   protected subscribed: { [key: string]: Observable<unknown> } = {};
 
-  protected auth$: Observable<unknown> = of();
-
   constructor() {
     this.subject = webSocket({
       url: 'wss://ws.lightstream.bitflyer.com/json-rpc',
-      WebSocketCtor: WebSocket,
+      // eslint-disable-next-line global-require
+      WebSocketCtor: require('ws'),
     });
     this.subject.subscribe();
   }
@@ -67,8 +64,7 @@ export default class RealtimeClient {
   protected subscribe(channel: string) {
     if (!this.subscribed[channel]) {
       this.subscribed[channel] = concat(
-        this.auth$.pipe(ignoreElements()),
-        this.call('subscribe', { channel }).pipe(ignoreElements()),
+        from(this.call('subscribe', { channel })).pipe(ignoreElements()),
         this.channelMessage(channel),
       );
     }
@@ -86,20 +82,21 @@ export default class RealtimeClient {
     );
   }
 
-  protected call(method: string, params: object) {
-    return of(Date.now().toString()).pipe(
-      tap(
-        (id) => this.subject.next({
-          jsonrpc: '2.0',
-          method,
-          params,
-          id,
-        }),
-      ),
-      mergeMap((id) => this.subject.asObservable().pipe(filter((res) => res.id === id))),
-      map((x) => x as JsonRpcResponse),
-      mergeMap((res) => (res.error ? throwError(res.error.message) : of(res))),
+  protected async call(method: string, params: object) {
+    const id = Date.now().toString();
+    this.subject.next({
+      jsonrpc: '2.0',
+      method,
+      params,
+      id,
+    });
+    const response: JsonRpcResponse = await this.subject.pipe(
+      filter((res) => res.id === id),
       first(),
-    );
+    ).toPromise();
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    return response;
   }
 }
