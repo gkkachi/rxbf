@@ -3,9 +3,6 @@ import { URL } from 'url';
 import { createHmac } from 'crypto';
 import type * as Types from './types';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('dotenv').config();
-
 export default class HttpClientAuth {
   private key: string;
 
