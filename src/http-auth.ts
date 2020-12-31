@@ -3,7 +3,7 @@ import { URL } from 'url';
 import { createHmac } from 'crypto';
 import type * as Types from './types';
 
-export default class HttpClientAuth {
+export default class HttpAuthClient {
   private key: string;
 
   private secret: string;

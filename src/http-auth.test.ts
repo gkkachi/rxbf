@@ -1,12 +1,12 @@
 import './rxbf';
 import { env } from 'process';
-import HttpClientAuth from './http-auth';
+import HttpAuthClient from './http-auth';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv').config();
 
-describe('HttpClientAuth', () => {
-  const client = new HttpClientAuth(env.BITFLYER_API_KEY, env.BITFLYER_API_SECRET);
+describe('HttpAuthClient', () => {
+  const client = new HttpAuthClient(env.BITFLYER_API_KEY, env.BITFLYER_API_SECRET);
   const code: 'FX_BTC_JPY' = 'FX_BTC_JPY';
 
   it('should get permissions', async () => {
