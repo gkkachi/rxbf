@@ -342,16 +342,16 @@ export const parentOrderBody: ParentOrderBody = {
 };
 
 export const cancelParentOrder1 = {
-  product_code: 'BTC_JPY',
+  product_code: 'BTC_JPY' as ProductCode,
   parent_order_id: 'JCO20150925-055555-022222',
 };
 
 export const cancelParentOrder2 = {
-  product_code: 'BTC_JPY',
+  product_code: 'BTC_JPY' as ProductCode,
   parent_order_acceptance_id: 'JRF20150925-033333-099999',
 };
 
-export type CancelParentOrder = typeof cancelChildOrder1 | typeof cancelChildOrder2;
+export type CancelParentOrder = typeof cancelParentOrder1 | typeof cancelParentOrder2;
 
 export const cancelAllChildOrders = {
   product_code: 'BTC_JPY' as ProductCode,
@@ -441,9 +441,9 @@ export const parentOrders = [
   },
 ];
 
-export type ParentOrders = typeof parentOrders;
+export type ParentOrder = typeof parentOrders[0];
 
-export type ParentOrder = {
+export type ParentOrderDetail = {
   id: number,
   parent_order_id: string,
   parent_order_acceptance_id: string,
@@ -453,7 +453,7 @@ export type ParentOrder = {
   parameters: ParentOrderParameterItem[],
 };
 
-export const parentOrder: ParentOrder = {
+export const parentOrder: ParentOrderDetail = {
   id: 4242,
   parent_order_id: 'JCP20150825-046876-036161',
   order_method: 'IFDOCO',
@@ -599,3 +599,94 @@ export const tradingCommission = {
 };
 
 export type TradingCommission = typeof tradingCommission;
+
+export type ChildOrderEventType = 'ORDER' | 'ORDER_FAILED' | 'CANCEL' | 'CANCEL_FAILED' | 'EXECUTION' | 'EXPIRE';
+
+export type ChildOrderEventRequired<T extends ChildOrderEventType> = {
+  product_code: ProductCode,
+  child_order_id: string,
+  child_order_acceptance_id: string,
+  event_date: string,
+  event_type: T,
+};
+
+export type ChildOrderEventOptional = {
+  child_order_type: OrderType,
+  expire_date: string,
+  reason: string,
+  exec_id: number,
+  side: Side,
+  price: number,
+  size: number,
+  commission: number,
+  sfd: number,
+  outstanding_size: number,
+}
+
+export type ChildOrderEvent = (ChildOrderEventRequired<'ORDER'> & Pick<ChildOrderEventOptional, 'child_order_type' | 'expire_date' | 'side' | 'price' | 'size'>)
+  | (ChildOrderEventRequired<'ORDER_FAILED'> & Pick<ChildOrderEventOptional, 'reason'>)
+  | (ChildOrderEventRequired<'CANCEL'> & Pick<ChildOrderEventOptional, 'price' | 'size'>)
+  | (ChildOrderEventRequired<'CANCEL_FAILED'>)
+  | (ChildOrderEventRequired<'EXECUTION'> & Pick<ChildOrderEventOptional, 'expire_date' | 'exec_id' | 'side' | 'price' | 'size' | 'commission' | 'sfd' | 'outstanding_size'>)
+  | (ChildOrderEventRequired<'EXPIRE'> & Pick<ChildOrderEventOptional, 'price' | 'size'>)
+
+export const childOrderEvents: ChildOrderEvent[] = [
+  {
+    product_code: 'BTC_JPY',
+    child_order_id: 'JOR20150101-070921-038077',
+    child_order_acceptance_id: 'JRF20150101-070921-194057',
+    event_date: '2015-01-01T07:09:21.9301772Z',
+    event_type: 'ORDER',
+    child_order_type: 'LIMIT',
+    side: 'SELL',
+    price: 500000,
+    size: 0.12,
+    expire_date: '2015-01-01T07:10:21',
+  },
+];
+
+export type ParentOrderEventType = 'ORDER' | 'ORDER_FAILED' | 'CANCEL' | 'TRIGGER' | 'COMPLETE' | 'EXPIRE';
+
+export type ParentOrderEventRequired<T extends ParentOrderEventType> = {
+  product_code: ProductCode,
+  parent_order_id: string,
+  parent_order_acceptance_id: string,
+  event_date: string,
+  event_type: T,
+};
+
+export type ParentOrderEventOptional = {
+  parent_order_type: ConditionType | OrderMethod,
+  reason: string,
+  child_order_type: OrderType,
+  parameter_index: number,
+  child_order_acceptance_id: string,
+  side: Side,
+  price: number,
+  size: number,
+  expire_date: string,
+}
+
+export type ParentOrderEvent = (ParentOrderEventRequired<'ORDER'> & Pick<ParentOrderEventOptional, 'parent_order_type' | 'expire_date'>)
+| (ParentOrderEventRequired<'ORDER_FAILED'> & Pick<ParentOrderEventOptional, 'reason'>)
+| (ParentOrderEventRequired<'CANCEL'>)
+| (ParentOrderEventRequired<'TRIGGER'> & Pick<ParentOrderEventOptional, 'child_order_type' | 'parameter_index' | 'child_order_acceptance_id' | 'side' | 'price' | 'size' | 'expire_date'>)
+| (ParentOrderEventRequired<'COMPLETE'> & Pick<ParentOrderEventOptional, 'parameter_index'| 'child_order_acceptance_id'>)
+| (ParentOrderEventRequired<'EXPIRE'>)
+
+export const parentOrderEvents: ParentOrderEvent[] = [
+  {
+    product_code: 'BTC_JPY',
+    parent_order_id: 'JCP20150101-035534-486653',
+    parent_order_acceptance_id: 'JRF20150101-035534-188098',
+    event_date: '2015-01-01T03:55:34.9730659Z',
+    event_type: 'TRIGGER',
+    parameter_index: 1,
+    child_order_type: 'LIMIT',
+    side: 'BUY',
+    price: 500000,
+    size: 0.12,
+    expire_date: '2015-01-02T02:35:34.8199789Z',
+    child_order_acceptance_id: 'JRF20150101-035534-486668',
+  },
+];

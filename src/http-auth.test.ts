@@ -14,6 +14,11 @@ describe('HttpClientAuth', () => {
     expect(res).toBeInstanceOf(Array);
   });
 
+  it('should get addresses', async () => {
+    const res = await client.addresses();
+    expect(res).toBeInstanceOf(Array);
+  });
+
   it('should get trading commission', async () => {
     const res = await client.tradingCommission(code);
     expect(res).toEqual({

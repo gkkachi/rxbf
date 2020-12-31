@@ -28,6 +28,14 @@ export default class HttpClientAuth {
     return this.get<Types.Collateral>('getcollateral', {});
   }
 
+  public collateralAccounts() {
+    return this.get<Types.CollateralAccount[]>('getcollateralaccounts', {});
+  }
+
+  public addresses() {
+    return this.get<Types.Address[]>('getaddresses', {});
+  }
+
   public coinIns() {
     return this.get<Types.CoinIn[]>('getcoinins', {});
   }
@@ -58,8 +66,42 @@ export default class HttpClientAuth {
     return this.post('sendchildorder', body);
   }
 
+  public cancelChildOrder(
+    body: Types.CancelChildOrder,
+  ) {
+    return this.post('cancelchildorder', body);
+  }
+
+  public sendParentOrder(body: Types.ParentOrderBody) {
+    return this.post('sendparentorder', body);
+  }
+
+  public cancelParentOrder(body: Types.CancelParentOrder) {
+    return this.post('cancelparentorder', body);
+  }
+
   public cancelAllChildOrders(product: Types.ProductCode) {
     return this.post('cancelallchildorders', { product_code: product });
+  }
+
+  public childOrders(product: Types.ProductCode) {
+    return this.get<Types.ChildOrder[]>('getchildorders', { product_code: product });
+  }
+
+  public parentOrders(product: Types.ProductCode) {
+    return this.get<Types.ParentOrder[]>('getparentorders', { product_code: product });
+  }
+
+  public parentOrderDetail(id: string) {
+    return this.get<Types.ParentOrderDetail>('getparentorder', { parent_order_id: id });
+  }
+
+  public executions(product: Types.ProductCode) {
+    return this.get<Types.Execution[]>('getexecutions', { product_code: product });
+  }
+
+  public balanceHistory(currency: Types.CurrencyCode) {
+    return this.get<Types.BalanceHistoryItem[]>('getbalancehistory', { currency_code: currency });
   }
 
   public positions(product: 'FX_BTC_JPY') {

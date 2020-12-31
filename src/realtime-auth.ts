@@ -1,7 +1,8 @@
 import { createHmac, randomBytes } from 'crypto';
 import { Observable, from, concat } from 'rxjs';
-import { ignoreElements, shareReplay } from 'rxjs/operators';
+import { ignoreElements, mergeAll, shareReplay } from 'rxjs/operators';
 import RealtimeClient from './realtime';
+import type * as Types from './types';
 
 export default class RealtimeAuthClient extends RealtimeClient {
   private auth$: Observable<unknown>;
@@ -15,15 +16,15 @@ export default class RealtimeAuthClient extends RealtimeClient {
   }
 
   public childOrderEvents() {
-    return this.subscribe('child_order_events');
+    return this.subscribe<Types.ChildOrderEvent[]>('child_order_events').pipe(mergeAll());
   }
 
   public parentOrderEvents() {
-    return this.subscribe('parent_order_events');
+    return this.subscribe<Types.ParentOrderEvent[]>('parent_order_events').pipe(mergeAll());
   }
 
-  protected subscribe(channel: string) {
-    return concat(this.auth$, super.subscribe(channel));
+  protected subscribe<T>(channel: string) {
+    return concat(this.auth$, super.subscribe<T>(channel)) as Observable<T>;
   }
 
   protected auth(key: string, secret: string) {

@@ -3,8 +3,9 @@ import {
 } from 'rxjs';
 import { webSocket } from 'rxjs/webSocket';
 import {
-  filter, first, ignoreElements, map, share,
+  filter, first, ignoreElements, map, mergeAll, share,
 } from 'rxjs/operators';
+import type * as Types from './types';
 
 type JsonRpcId = string;
 
@@ -46,29 +47,29 @@ export default class RealtimeClient {
   }
 
   public board(product: ProductCode) {
-    return this.subscribe(`lightning_board_${product}`);
+    return this.subscribe<Types.Board>(`lightning_board_${product}`);
   }
 
   public boardSnapshot(product: ProductCode) {
-    return this.subscribe(`lightning_board_snapshot_${product}`);
+    return this.subscribe<Types.Board>(`lightning_board_snapshot_${product}`);
   }
 
   public executions(product: ProductCode) {
-    return this.subscribe(`lightning_executions_${product}`);
+    return this.subscribe<Types.Execution[]>(`lightning_executions_${product}`).pipe(mergeAll());
   }
 
   public ticker(product: ProductCode) {
-    return this.subscribe(`lightning_ticker_${product}`);
+    return this.subscribe<Types.Ticker>(`lightning_ticker_${product}`);
   }
 
-  protected subscribe(channel: string) {
+  protected subscribe<T>(channel: string) {
     if (!this.subscribed[channel]) {
       this.subscribed[channel] = concat(
         from(this.call('subscribe', { channel })).pipe(ignoreElements()),
         this.channelMessage(channel),
       );
     }
-    return this.subscribed[channel];
+    return this.subscribed[channel] as Observable<T>;
   }
 
   protected channelMessage(channel: string) {
