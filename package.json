@@ -1,6 +1,6 @@
 {
   "name": "rxbf",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Reactive bitFlyer Lightning Library",
   "main": "./dist/index.js",
   "files": [
@@ -9,6 +9,10 @@
   "repository": "https://github.com/gkkachi/rxbf.git",
   "author": "Konosuke Kachi <github@s.k-kachi.net>",
   "license": "MIT",
+  "keywords": [
+    "bitflyer",
+    "rxjs"
+  ],
   "scripts": {
     "lint": "eslint --ext .ts ./src",
     "test": "jest",
