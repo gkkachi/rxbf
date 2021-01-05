@@ -1,6 +1,6 @@
 {
   "name": "rxbf",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Reactive bitFlyer Lightning Library",
   "main": "./dist/index.js",
   "files": [
