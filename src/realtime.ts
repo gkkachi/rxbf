@@ -1,49 +1,27 @@
-import {
-  Observable, Subject, concat, from,
-} from 'rxjs';
-import { webSocket } from 'rxjs/webSocket';
-import {
-  filter, first, ignoreElements, map, mergeAll, share,
-} from 'rxjs/operators';
+import { createHmac, randomBytes } from 'crypto';
+import { Client } from 'jsonrpc2-ws';
+import { Observable } from 'rxjs';
+import { filter, map, mergeAll } from 'rxjs/operators';
 import type * as Types from './types';
-
-type JsonRpcId = string;
-
-type JsonRpcRequest = {
-  jsonrpc: '2.0',
-  method: string,
-  params: any,
-  id: JsonRpcId,
-}
-
-type JsonRpcResponse = {
-  jsonrpc: '2.0',
-  result?: boolean,
-  error?: {
-    code: number,
-    message: string,
-  },
-  id: JsonRpcId,
-}
 
 type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
 
 export default class RealtimeClient {
-  protected subject: Subject<JsonRpcRequest | JsonRpcResponse>;
+  protected client: Client;
 
-  protected subscribed: { [key: string]: Observable<unknown> } = {};
+  protected message$: Observable<{ channel: string, message: unknown }>;
 
   constructor() {
-    this.subject = webSocket({
-      url: 'wss://ws.lightstream.bitflyer.com/json-rpc',
-      // eslint-disable-next-line global-require
-      WebSocketCtor: require('ws'),
+    this.client = new Client('wss://ws.lightstream.bitflyer.com/json-rpc');
+    this.message$ = new Observable((subscriber) => {
+      this.client.methods.set('channelMessage', (_, params) => {
+        subscriber.next(params);
+      });
     });
-    this.subject.subscribe();
   }
 
   public unsubscribe() {
-    this.subject.unsubscribe();
+    this.client.disconnect();
   }
 
   public board(product: ProductCode) {
@@ -63,41 +41,20 @@ export default class RealtimeClient {
   }
 
   protected subscribe<T>(channel: string) {
-    if (!this.subscribed[channel]) {
-      this.subscribed[channel] = concat(
-        from(this.call('subscribe', { channel })).pipe(ignoreElements()),
-        this.channelMessage(channel),
-      );
-    }
-    return this.subscribed[channel] as Observable<T>;
-  }
-
-  protected channelMessage(channel: string) {
-    return this.subject.asObservable().pipe(
-      map((x) => x as JsonRpcRequest),
-      filter(
-        (x) => x.method === 'channelMessage' && x.params?.channel === channel,
-      ),
-      map((x) => x.params?.message),
-      share(),
+    this.client.call('subscribe', { channel });
+    return this.message$.pipe(
+      filter((params) => params.channel === channel),
+      map(({ message }) => message as T),
     );
   }
 
-  protected async call(method: string, params: object) {
-    const id = Date.now().toString();
-    this.subject.next({
-      jsonrpc: '2.0',
-      method,
-      params,
-      id,
+  protected auth(key: string, secret: string) {
+    const timestamp = Date.now();
+    const nonce = randomBytes(16).toString('hex');
+    const signature = createHmac('sha256', secret)
+      .update(timestamp + nonce).digest('hex');
+    return this.client.call('auth', {
+      api_key: key, timestamp, nonce, signature,
     });
-    const response: JsonRpcResponse = await this.subject.pipe(
-      filter((res) => res.id === id),
-      first(),
-    ).toPromise();
-    if (response.error) {
-      throw new Error(response.error.message);
-    }
-    return response;
   }
 }
