@@ -43,7 +43,8 @@
     "jsonrpc2-ws": "^1.0.0-beta18",
     "node-abort-controller": "^1.1.0",
     "node-fetch": "^2.6.1",
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.3",
+    "ws": "^7.4.2"
   },
   "lint-staged": {
     "*.ts": [
