@@ -1,7 +1,9 @@
 import { createHmac, randomBytes } from 'crypto';
 import { Client } from 'jsonrpc2-ws';
-import { Observable } from 'rxjs';
-import { filter, map, mergeAll } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import {
+  concatMap, distinct, filter, map, mergeAll, share,
+} from 'rxjs/operators';
 import type * as Types from './types';
 
 type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
@@ -11,13 +13,19 @@ export default class RealtimeClient {
 
   protected message$: Observable<{ channel: string, message: unknown }>;
 
+  protected channel$ = new Subject<string>();
+
   constructor() {
     this.client = new Client('wss://ws.lightstream.bitflyer.com/json-rpc');
     this.message$ = new Observable((subscriber) => {
       this.client.methods.set('channelMessage', (_, params) => {
         subscriber.next(params);
       });
-    });
+    }).pipe(share<any>());
+    this.channel$.pipe(
+      distinct(),
+      concatMap((channel) => this.client.call('subscribe', { channel })),
+    ).subscribe();
   }
 
   public unsubscribe() {
@@ -41,7 +49,7 @@ export default class RealtimeClient {
   }
 
   protected subscribe<T>(channel: string) {
-    this.client.call('subscribe', { channel });
+    this.channel$.next(channel);
     return this.message$.pipe(
       filter((params) => params.channel === channel),
       map(({ message }) => message as T),
