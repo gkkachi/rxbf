@@ -1,35 +1,25 @@
 import { createHmac, randomBytes } from 'crypto';
-import { Client } from 'jsonrpc2-ws';
-import { Observable, Subject } from 'rxjs';
-import {
-  concatMap, distinct, filter, map, mergeAll, share,
-} from 'rxjs/operators';
+import io from 'socket.io-client';
+import { Observable, ReplaySubject } from 'rxjs';
+import { distinct, mergeAll } from 'rxjs/operators';
 import type * as Types from './types';
 
 type ProductCode = 'BTC_JPY' | 'FX_BTC_JPY' | 'ETH_BTC';
 
 export default class RealtimeClient {
-  protected client: Client;
+  protected socket: ReturnType<typeof io>;
 
-  protected message$: Observable<{ channel: string, message: unknown }>;
-
-  protected channel$ = new Subject<string>();
+  protected channel$ = new ReplaySubject<string>();
 
   constructor() {
-    this.client = new Client('wss://ws.lightstream.bitflyer.com/json-rpc');
-    this.message$ = new Observable((subscriber) => {
-      this.client.methods.set('channelMessage', (_, params) => {
-        subscriber.next(params);
-      });
-    }).pipe(share<any>());
-    this.channel$.pipe(
-      distinct(),
-      concatMap((channel) => this.client.call('subscribe', { channel })),
-    ).subscribe();
+    this.socket = io('https://io.lightstream.bitflyer.com', { transports: ['websocket'] });
+    this.socket.on('connect', () => {
+      this.channel$.pipe(distinct()).subscribe((channel) => this.socket.emit('subscribe', channel));
+    });
   }
 
   public unsubscribe() {
-    this.client.disconnect();
+    this.socket.disconnect();
   }
 
   public board(product: ProductCode) {
@@ -50,10 +40,9 @@ export default class RealtimeClient {
 
   protected subscribe<T>(channel: string) {
     this.channel$.next(channel);
-    return this.message$.pipe(
-      filter((params) => params.channel === channel),
-      map(({ message }) => message as T),
-    );
+    return new Observable<T>((subscriber) => {
+      this.socket.on(channel, (message: T) => subscriber.next(message));
+    });
   }
 
   protected auth(key: string, secret: string) {
@@ -61,8 +50,13 @@ export default class RealtimeClient {
     const nonce = randomBytes(16).toString('hex');
     const signature = createHmac('sha256', secret)
       .update(timestamp + nonce).digest('hex');
-    return this.client.call('auth', {
-      api_key: key, timestamp, nonce, signature,
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit('auth', {
+        api_key: key, timestamp, nonce, signature,
+      }, (err: any) => {
+        if (err) reject(err);
+        resolve();
+      });
     });
   }
 }
