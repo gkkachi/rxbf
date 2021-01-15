@@ -41,7 +41,9 @@ export default class RealtimeClient {
   protected subscribe<T>(channel: string) {
     this.channel$.next(channel);
     return new Observable<T>((subscriber) => {
-      this.socket.on(channel, (message: T) => subscriber.next(message));
+      const listener = (message: T) => subscriber.next(message);
+      this.socket.on(channel, listener);
+      return () => this.socket.off(channel, listener);
     });
   }
 
