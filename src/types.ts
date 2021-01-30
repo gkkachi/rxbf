@@ -259,7 +259,20 @@ export type Withdrawal = typeof withdrawals[0]
 export type OrderType = 'LIMIT' | 'MARKET';
 export type TimeInForce = 'GTC' | 'IOC' | 'FOK';
 
-export const childOrderBody = {
+export type ChildOrderBodyItem = {
+  product_code: ProductCode,
+  child_order_type: OrderType,
+  side: Side,
+  size: number,
+  price: number,
+  minute_to_expire: number,
+  time_in_force: TimeInForce,
+}
+
+export type ChildOrderBody = (ChildOrderBodyItem & { child_order_type: 'LIMIT' })
+  | (Omit<ChildOrderBodyItem & { child_order_type: 'MARKET' }, 'price'>)
+
+export const childOrderBody: ChildOrderBody = {
   product_code: 'BTC_JPY' as ProductCode,
   child_order_type: 'LIMIT' as OrderType,
   side: 'BUY' as Side,
@@ -268,8 +281,6 @@ export const childOrderBody = {
   minute_to_expire: 10000,
   time_in_force: 'GTC' as TimeInForce,
 };
-
-export type ChildOrderBody = typeof childOrderBody;
 
 export const cancelChildOrder1 = {
   product_code: 'BTC_JPY' as ProductCode,
