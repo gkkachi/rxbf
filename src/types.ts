@@ -273,13 +273,13 @@ export type ChildOrderBody = (ChildOrderBodyItem & { child_order_type: 'LIMIT' }
   | (Omit<ChildOrderBodyItem & { child_order_type: 'MARKET' }, 'price'>)
 
 export const childOrderBody: ChildOrderBody = {
-  product_code: 'BTC_JPY' as ProductCode,
-  child_order_type: 'LIMIT' as OrderType,
-  side: 'BUY' as Side,
+  product_code: 'BTC_JPY',
+  child_order_type: 'LIMIT',
+  side: 'BUY',
   price: 30000,
   size: 0.1,
   minute_to_expire: 10000,
-  time_in_force: 'GTC' as TimeInForce,
+  time_in_force: 'GTC',
 };
 
 export const cancelChildOrder1 = {
